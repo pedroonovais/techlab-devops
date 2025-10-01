@@ -32,7 +32,7 @@ jobs:
     - name: Deploy to Azure Web App
       uses: azure/webapps-deploy@v2
       with:
-        app-name: 'app-pg-rm556219'
+        app-name: 'app-pg-rm555276'
         slot-name: 'production'
         publish-profile: ${{ secrets.AzureAppService_PublishProfile_6a906e3eb79e4e25886bac90654c9af8 }}
         package: 'build/libs/*.jar'
