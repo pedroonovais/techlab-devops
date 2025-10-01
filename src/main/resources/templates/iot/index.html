@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="dark" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{fragments/header :: head('IoT')}"></head>
+
+<body class="bg-gray-900 text-white min-h-screen flex flex-col font-sans">
+    <!-- Header -->
+    <nav th:replace="~{fragments/header :: navbar}"></nav>
+
+    <main class="flex-1 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6">
+        <!-- Título + Ações -->
+        <section class="mb-4 flex items-center justify-between gap-3">
+            <h1 class="text-2xl font-bold">Dispositivos IoT</h1>
+            <a href="/iot/form"
+                class="bg-green-600 hover:bg-green-700 text-gray-900 px-4 py-2 rounded-md font-semibold transition-colors">
+                + Novo IoT
+            </a>
+        </section>
+
+        <!-- Mensagem -->
+        <div th:if="${message}" class="rounded-lg border border-cyan-700 bg-cyan-900/40 text-cyan-200 px-4 py-3 mb-4"
+            th:text="${message}">
+        </div>
+
+        <!-- Filtros (client-side) -->
+        <section class="mb-4 grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <input id="filterCoord" type="text" placeholder="Filtrar por coordenada (X/Y)..." class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white
+                    focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500">
+            <input id="filterBateria" type="number" min="0" max="100" placeholder="Bateria mínima (%)" class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white
+                    focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500">
+            <select id="filterStatus" class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white
+                     focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500">
+                <option value="">Todos os status</option>
+                <option value="ativo">Ativos</option>
+                <option value="inativo">Inativos</option>
+            </select>
+        </section>
+
+        <!-- Tabela -->
+        <section class="rounded-xl bg-gray-800 border border-gray-700 shadow-2xl overflow-x-auto">
+            <table class="min-w-full text-sm" id="iotTable">
+                <thead>
+                    <tr class="text-left text-gray-400">
+                        <th class="py-2 px-3">ID</th>
+                        <th class="py-2 px-3">Status</th>
+                        <th class="py-2 px-3">Bateria</th>
+                        <th class="py-2 px-3">Coordenada X</th>
+                        <th class="py-2 px-3">Coordenada Y</th>
+                        <th class="py-2 px-3">Ações</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-700">
+                    <tr th:if="${#lists.isEmpty(iots)}">
+                        <td colspan="6" class="py-4 text-center text-gray-400">Nenhum dispositivo cadastrado</td>
+                    </tr>
+
+                    <tr th:each="i : ${iots}" class="hover:bg-gray-700/40">
+                        <td class="py-2 px-3" th:text="${i.id}">—</td>
+                        <td class="py-2 px-3">
+                            <span class="text-xs px-2 py-1 rounded border" th:text="${i.ativo ? 'Ativo' : 'Inativo'}"
+                                th:classappend="${i.ativo} ? 'text-green-300 bg-green-900/30 border-green-700'
+                                              : 'text-red-300 bg-red-900/30 border-red-700'">
+                            </span>
+                        </td>
+                        <td class="py-2 px-3">
+                            <div class="flex items-center gap-2">
+                                <span th:text="${i.bateria != null ? i.bateria + '%' : '—'}">—</span>
+                            </div>
+                            <!-- Barra de bateria -->
+                            <div class="mt-1 h-2 w-32 bg-gray-700 rounded">
+                                <div class="h-2 rounded"
+                                    th:style="'width:' + (${i.bateria != null ? i.bateria : 0}) + '%;'" th:classappend="${
+                        i.bateria != null && i.bateria >= 80 ? 'bg-green-500' :
+                        (i.bateria != null && i.bateria >= 50 ? 'bg-yellow-500' : 'bg-red-500')
+                     }">
+                                </div>
+                            </div>
+                        </td>
+                        <td class="py-2 px-3 iot-coordx" th:text="${i.coordenadaX}">—</td>
+                        <td class="py-2 px-3 iot-coordy" th:text="${i.coordenadaY}">—</td>
+                        <td class="py-2 px-3">
+                            <div class="flex flex-wrap gap-2">
+                                <!-- Editar -->
+                                <a th:href="@{'/iot/form'(id=${i.id})}" class="bg-gray-700 hover:bg-cyan-600/20 text-white border border-cyan-500
+                          px-3 py-1.5 rounded-md transition-colors text-xs">
+                                    Editar
+                                </a>
+
+                                <!-- Excluir (POST /iot/{id}/delete) -->
+                                <form th:action="@{'/iot/' + ${i.id} + '/delete'}" method="post"
+                                    onsubmit="return confirm('Tem certeza que deseja remover este dispositivo IoT?');">
+                                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                                    <button type="submit"
+                                        class="bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded-md transition-colors text-xs">
+                                        Excluir
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <div th:replace="~{fragments/footer :: footer}"></div>
+
+    <!-- Filtro local (coordenadas, bateria mínima e status) -->
+    <script>
+        const qCoord = document.getElementById('filterCoord');
+        const qBat = document.getElementById('filterBateria');
+        const qStatus = document.getElementById('filterStatus');
+
+        function rows() {
+            return Array.from(document.querySelectorAll('#iotTable tbody tr'))
+                .filter(r => !r.querySelector('td[colspan]')); // ignora linha "Nenhum dispositivo..."
+        }
+
+        function applyFilter() {
+            const txt = (qCoord.value || '').toLowerCase();
+            const minBat = qBat.value !== '' ? parseInt(qBat.value, 10) : null;
+            const status = qStatus.value; // '', 'ativo', 'inativo'
+
+            rows().forEach(tr => {
+                const coordx = tr.querySelector('.iot-coordx')?.textContent?.toLowerCase() || '';
+                const coordy = tr.querySelector('.iot-coordy')?.textContent?.toLowerCase() || '';
+                const batTxt = tr.querySelector('td:nth-child(3) span')?.textContent || '—';
+                const isActive = tr.querySelector('td:nth-child(2) span')?.textContent?.toLowerCase() === 'ativo';
+
+                // baterias: extrai número (ex.: "85%")
+                const bat = batTxt.includes('%') ? parseInt(batTxt.replace('%', ''), 10) : null;
+
+                const matchesText = coordx.includes(txt) || coordy.includes(txt);
+                const matchesBattery = (minBat === null) || (bat !== null && bat >= minBat);
+                const matchesStatus = (status === '') ||
+                    (status === 'ativo' && isActive) ||
+                    (status === 'inativo' && !isActive);
+
+                tr.style.display = (matchesText && matchesBattery && matchesStatus) ? '' : 'none';
+            });
+        }
+
+        qCoord?.addEventListener('input', applyFilter);
+        qBat?.addEventListener('input', applyFilter);
+        qStatus?.addEventListener('change', applyFilter);
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="dark" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{fragments/header :: head('Pátios')}"></head>
+
+<body class="bg-gray-900 text-white min-h-screen flex flex-col font-sans">
+    <!-- Header -->
+    <nav th:replace="~{fragments/header :: navbar}"></nav>
+
+    <main class="flex-1 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6">
+        <!-- Título + Ações -->
+        <section class="mb-4 flex items-center justify-between gap-3">
+            <h1 class="text-2xl font-bold">Pátios</h1>
+            <a href="/patio/form"
+                class="bg-green-600 hover:bg-green-700 text-gray-900 px-4 py-2 rounded-md font-semibold transition-colors">
+                + Novo Pátio
+            </a>
+        </section>
+
+        <!-- Mensagem de sucesso -->
+        <div th:if="${message}" class="rounded-lg border border-cyan-700 bg-cyan-900/40 text-cyan-200 px-4 py-3 mb-4"
+            th:text="${message}">
+        </div>
+
+        <!-- Filtro (client-side) -->
+        <section class="mb-4">
+            <input id="filterPatio" type="text" placeholder="Filtrar por nome..." class="w-full sm:w-80 px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white
+                    focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500">
+        </section>
+
+        <!-- Tabela -->
+        <section class="rounded-xl bg-gray-800 border border-gray-700 shadow-2xl overflow-x-auto">
+            <table class="min-w-full text-sm">
+                <thead>
+                    <tr class="text-left text-gray-400">
+                        <th class="py-2 px-3">ID</th>
+                        <th class="py-2 px-3">Nome</th>
+                        <th class="py-2 px-3">Ações</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-700">
+                    <tr th:if="${#lists.isEmpty(patios)}">
+                        <td colspan="3" class="py-4 text-center text-gray-400">Nenhum pátio cadastrado</td>
+                    </tr>
+
+                    <tr th:each="p : ${patios}" class="hover:bg-gray-700/40">
+                        <td class="py-2 px-3" th:text="${p.id}">—</td>
+                        <td class="py-2 px-3 patio-nome" th:text="${p.nome}">—</td>
+                        <td class="py-2 px-3">
+                            <div class="flex flex-wrap gap-2">
+                                <!-- Editar (usa o controller /patio/{id}/edit) -->
+                                <a th:href="@{'/patio/' + ${p.id} + '/edit'}" class="bg-gray-700 hover:bg-cyan-600/20 text-white border border-cyan-500
+                          px-3 py-1.5 rounded-md transition-colors text-xs">
+                                    Editar
+                                </a>
+
+                                <!-- Excluir (usa o controller @PostMapping("/{id}/delete")) -->
+                                <form th:action="@{'/patio/' + ${p.id} + '/delete'}" method="post"
+                                    onsubmit="return confirm('Tem certeza que deseja remover este pátio?');">
+                                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                                    <button type="submit"
+                                        class="bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded-md transition-colors text-xs">
+                                        Excluir
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <div th:replace="~{fragments/footer :: footer}"></div>
+
+    <!-- Filtro local por nome -->
+    <script>
+        const input = document.getElementById('filterPatio');
+        const rows = () => Array.from(document.querySelectorAll('tbody tr'))
+            .filter(r => !r.querySelector('td[colspan]')); // ignora linha "Nenhum pátio"
+
+        if (input) {
+            input.addEventListener('input', () => {
+                const q = input.value.toLowerCase();
+                rows().forEach(tr => {
+                    const nome = tr.querySelector('.patio-nome')?.textContent?.toLowerCase() || '';
+                    tr.style.display = nome.includes(q) ? '' : 'none';
+                });
+            });
+        }
+    </script>
+</body>
+
+</html>

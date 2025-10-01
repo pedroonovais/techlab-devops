@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="dark" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{fragments/header :: head('Erro')}"></head>
+
+<body class="bg-gray-900 text-white min-h-screen flex flex-col font-sans">
+    <!-- Header -->
+    <nav th:replace="~{fragments/header :: navbar}"></nav>
+
+    <!-- Conteúdo -->
+    <main class="flex-1 flex items-center justify-center px-4 py-10">
+        <section class="w-full max-w-md rounded-xl bg-gray-800 border border-red-600 shadow-2xl p-6 text-center">
+            <div
+                class="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-red-900/30 border border-red-700">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-red-400" viewBox="0 0 24 24"
+                    fill="currentColor">
+                    <path fill-rule="evenodd"
+                        d="M9.401 1.592a2.25 2.25 0 0 1 3.198 0l9.81 9.81a2.25 2.25 0 0 1 0 3.182l-9.81 9.81a2.25 2.25 0 0 1-3.198 0l-9.81-9.81a2.25 2.25 0 0 1 0-3.182l9.81-9.81Zm2.099 4.658a.75.75 0 0 0-1.5 0v7.5a.75.75 0 0 0 1.5 0v-7.5Zm0 10.5a.75.75 0 1 0-1.5 0 .75.75 0 0 0 1.5 0Z"
+                        clip-rule="evenodd" />
+                </svg>
+            </div>
+
+            <h1 class="text-2xl font-bold text-red-400">Erro!</h1>
+            <p class="mt-2 text-gray-300" th:text="${message != null} ? ${message} : 'Ocorreu um problema inesperado.'">
+                Ocorreu um problema inesperado.
+            </p>
+
+            <!-- detalhe opcional do erro -->
+            <pre class="mt-4 whitespace-pre-wrap break-words rounded-md bg-gray-900/60 border border-gray-700 px-3 py-2 text-left text-sm text-gray-400"
+                th:if="${error}" th:text="${error}"></pre>
+
+            <div class="mt-6 flex flex-col sm:flex-row gap-2 justify-center">
+                <a href="/index"
+                    class="bg-green-600 hover:bg-green-700 text-gray-900 px-4 py-2 rounded-md font-semibold transition-colors">
+                    Ir para o Dashboard
+                </a>
+                <button type="button" onclick="history.back()"
+                    class="px-4 py-2 rounded-md border border-gray-600 bg-gray-700 hover:bg-gray-600 text-white transition-colors">
+                    Voltar
+                </button>
+            </div>
+
+            <!-- infos adicionais se disponíveis -->
+            <div class="mt-4 text-xs text-gray-500 space-y-1">
+                <div th:if="${status}">Status: <span th:text="${status}">—</span></div>
+                <div th:if="${path}">Rota: <span th:text="${path}">—</span></div>
+                <div th:if="${timestamp}">Quando: <span th:text="${timestamp}">—</span></div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <div th:replace="~{fragments/footer :: footer}"></div>
+</body>
+
+</html>

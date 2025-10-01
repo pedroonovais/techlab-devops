@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="dark" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{fragments/header :: head('Logout')}"></head>
+
+<body class="bg-gray-900 text-white min-h-screen flex items-center justify-center font-sans">
+    <main class="w-full max-w-md px-4">
+        <section class="rounded-xl bg-gray-800 border border-gray-700 shadow-2xl p-6 text-center">
+            <div
+                class="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-green-900/30 border border-green-700">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-green-400" viewBox="0 0 24 24"
+                    fill="currentColor">
+                    <path d="M12 3a1 1 0 0 1 1 1v8h3l-4 4-4-4h3V4a1 1 0 0 1 1-1z" />
+                    <path d="M5 13a7 7 0 1 0 14 0h2a9 9 0 1 1-18 0h2z" />
+                </svg>
+            </div>
+
+            <h1 class="text-2xl font-bold text-green-400">Logout</h1>
+            <p class="mt-2 text-gray-300">Tem certeza que deseja sair?</p>
+
+            <div class="mt-6 flex flex-col sm:flex-row gap-2 justify-center">
+                <!-- Confirma logout -->
+                <form method="post" th:action="@{/logout}" class="inline">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                    <button
+                        class="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-gray-900 px-4 py-2 rounded-md font-semibold transition-colors">
+                        Sair da conta
+                    </button>
+                </form>
+
+                <!-- Cancelar -->
+                <a href="javascript:history.back()"
+                    class="w-full sm:w-auto px-4 py-2 rounded-md border border-gray-600 bg-gray-700 hover:bg-gray-600 text-white transition-colors text-center">
+                    Cancelar
+                </a>
+            </div>
+
+            <!-- Link alternativo ao Dashboard -->
+            <div class="mt-4 text-sm">
+                <a href="/index" class="text-cyan-400 hover:text-cyan-300">Voltar ao Dashboard</a>
+            </div>
+        </section>
+    </main>
+</body>
+
+</html>

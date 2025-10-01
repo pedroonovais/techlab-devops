@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="dark" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{fragments/header :: head('Dashboard')}"></head>
+
+<body class="bg-gray-900 text-white min-h-screen flex flex-col font-sans">
+    <!-- Header -->
+    <nav th:replace="~{fragments/header :: navbar}"></nav>
+
+    <main class="flex-1 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6">
+        <!-- Ações rápidas (CRUD) -->
+        <section class="mb-6">
+            <div class="rounded-xl bg-gray-800 border border-gray-700 shadow-2xl p-4 flex flex-wrap gap-3 items-center">
+                <a href="/patio"
+                    class="bg-gray-700 hover:bg-cyan-600/20 text-white border border-cyan-500 px-4 py-2 rounded-md font-medium transition-colors">
+                    Gerenciar Pátios
+                </a>
+                <a href="/iot"
+                    class="bg-gray-700 hover:bg-cyan-600/20 text-white border border-cyan-500 px-4 py-2 rounded-md font-medium transition-colors">
+                    Gerenciar IoT
+                </a>
+                <a href="/moto"
+                    class="bg-gray-700 hover:bg-cyan-600/20 text-white border border-cyan-500 px-4 py-2 rounded-md font-medium transition-colors">
+                    Gerenciar Motos
+                </a>
+
+                <span class="h-6 w-px bg-gray-700 mx-1 hidden sm:inline-block"></span>
+
+                <a href="/patio/form"
+                    class="bg-green-600 hover:bg-green-700 text-gray-900 px-4 py-2 rounded-md font-semibold transition-colors">
+                    + Adicionar Pátio
+                </a>
+                <a href="/iot/form"
+                    class="bg-green-600 hover:bg-green-700 text-gray-900 px-4 py-2 rounded-md font-semibold transition-colors">
+                    + Adicionar IoT
+                </a>
+                <a href="/moto/form"
+                    class="bg-green-600 hover:bg-green-700 text-gray-900 px-4 py-2 rounded-md font-semibold transition-colors">
+                    + Adicionar Moto
+                </a>
+            </div>
+        </section>
+
+        <!-- KPIs -->
+        <section class="mb-6">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="rounded-xl bg-gray-800 border border-gray-700 p-6 shadow-2xl">
+                    <p class="text-gray-400 text-sm">Pátios</p>
+                    <p class="text-3xl font-bold text-green-500" th:text="${totalPatios}">0</p>
+                </div>
+                <div class="rounded-xl bg-gray-800 border border-gray-700 p-6 shadow-2xl">
+                    <p class="text-gray-400 text-sm">IoTs</p>
+                    <p class="text-3xl font-bold text-green-500" th:text="${totalIots}">0</p>
+                    <p class="text-xs text-gray-400 mt-1">Ativos: <span th:text="${iotsAtivos}">0</span></p>
+                </div>
+                <div class="rounded-xl bg-gray-800 border border-gray-700 p-6 shadow-2xl">
+                    <p class="text-gray-400 text-sm">Bateria Média (IoT)</p>
+                    <p class="text-3xl font-bold text-green-500"
+                        th:text="${bateriaMedia != null ? bateriaMedia + '%': '—'}">—</p>
+                </div>
+                <div class="rounded-xl bg-gray-800 border border-gray-700 p-6 shadow-2xl">
+                    <p class="text-gray-400 text-sm">Motos</p>
+                    <p class="text-3xl font-bold text-green-500" th:text="${totalMotos}">0</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Resumos -->
+        <section class="mb-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Resumo IoT -->
+            <div class="rounded-xl bg-gray-800 border border-gray-700 p-6 shadow-2xl">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="font-bold text-lg">Resumo de IoT</h3>
+                    <a href="/iot" class="text-cyan-400 hover:text-cyan-300 text-sm">Ver todos</a>
+                </div>
+
+                <!-- Indicador de taxa de ativos -->
+                <div class="mb-4">
+                    <div class="flex justify-between text-xs text-gray-400 mb-1">
+                        <span>Ativos</span>
+                        <span
+                            th:text="${totalIots > 0 ? (T(java.lang.Math).round((iotsAtivos*100.0)/totalIots)) + '%' : '—'}">—</span>
+                    </div>
+                    <div class="h-2 w-full bg-gray-700 rounded">
+                        <div class="h-2 bg-green-500 rounded"
+                            th:style="'width:' + (${totalIots > 0 ? (iotsAtivos*100)/totalIots : 0}) + '%;'">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Lista de IoTs -->
+                <div class="divide-y divide-gray-700">
+                    <div th:if="${#lists.isEmpty(iots)}" class="text-gray-400 text-sm">Sem registros.</div>
+
+                    <div th:each="i : ${iots}" class="py-3">
+                        <div class="flex items-center justify-between">
+                            <div class="min-w-0">
+                                <p class="font-medium truncate">
+                                    <span class="text-gray-300">Coordenadas:</span>
+                                    <span th:text="${i.coordenadaX + ' / ' + i.coordenadaY}"></span>
+                                </p>
+                                <p class="text-xs text-gray-400">
+                                    Bateria:
+                                    <span th:text="${i.bateria != null ? i.bateria + '%': '—'}">—</span>
+                                </p>
+                            </div>
+                            <span class="text-xs px-2 py-1 rounded border whitespace-nowrap"
+                                th:text="${i.ativo ? 'Ativo' : 'Inativo'}" th:classappend="${i.ativo} ? 'text-green-300 bg-green-900/30 border-green-700'
+                                              : 'text-red-300 bg-red-900/30 border-red-700'">
+                            </span>
+                        </div>
+
+                        <!-- Barra de bateria -->
+                        <div class="mt-2">
+                            <div class="h-2 w-full bg-gray-700 rounded">
+                                <div class="h-2 rounded"
+                                    th:style="'width:' + (${i.bateria != null ? i.bateria : 0}) + '%;'" th:classappend="${
+                        i.bateria != null && i.bateria >= 80 ? 'bg-green-500' :
+                        (i.bateria != null && i.bateria >= 50 ? 'bg-yellow-500' : 'bg-red-500')
+                     }">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Motos recentes -->
+            <div class="rounded-xl bg-gray-800 border border-gray-700 p-6 shadow-2xl">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="font-bold text-lg">Motos Recentes</h3>
+                    <a href="/moto" class="text-cyan-400 hover:text-cyan-300 text-sm">Ver todas</a>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full text-sm">
+                        <thead>
+                            <tr class="text-left text-gray-400">
+                                <th class="py-2 pr-4">Modelo</th>
+                                <th class="py-2 pr-4">Placa</th>
+                                <th class="py-2 pr-4">Entrada</th>
+                                <th class="py-2 pr-4">Saída</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-700">
+                            <tr th:if="${#lists.isEmpty(motos)}">
+                                <td colspan="4" class="py-3 text-gray-400">Sem registros.</td>
+                            </tr>
+                            <tr th:each="m : ${motos}">
+                                <td class="py-2 pr-4" th:text="${m.modelo}">—</td>
+                                <td class="py-2 pr-4" th:text="${m.placa}">—</td>
+                                <td class="py-2 pr-4" th:text="${#dates.format(m.dataEntrada, 'dd/MM/yyyy HH:mm')}">—
+                                </td>
+                                <td class="py-2 pr-4"
+                                    th:text="${m.dataSaida != null ? #dates.format(m.dataSaida, 'dd/MM/yyyy HH:mm') : '—'}">
+                                    —</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- Pátios -->
+        <section class="mb-10">
+            <div class="rounded-xl bg-gray-800 border border-gray-700 p-6 shadow-2xl">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="font-bold text-lg">Pátios</h3>
+                    <a href="/patio" class="text-cyan-400 hover:text-cyan-300 text-sm">Ver todos</a>
+                </div>
+
+                <!-- Filtro local por nome (client-side) -->
+                <div class="mb-4">
+                    <input id="filterPatio" type="text" placeholder="Filtrar por nome..." class="w-full sm:w-80 px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white
+                        focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500" />
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="min-w-full text-sm" id="tablePatio">
+                        <thead>
+                            <tr class="text-left text-gray-400">
+                                <th class="py-2 pr-4">Nome</th>
+                                <th class="py-2 pr-4">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-700">
+                            <tr th:if="${#lists.isEmpty(patios)}">
+                                <td colspan="2" class="py-3 text-gray-400">Sem registros.</td>
+                            </tr>
+                            <tr th:each="p : ${patios}">
+                                <td class="py-2 pr-4 patio-nome" th:text="${p.nome}">—</td>
+                                <td class="py-2 pr-4">
+                                    <a th:href="@{'/patio/form'(id=${p.id})}"
+                                        class="bg-gray-700 hover:bg-cyan-600/20 text-white border border-cyan-500 px-3 py-1.5 rounded-md transition-colors text-xs">
+                                        Editar
+                                    </a>
+                                    <a th:href="@{'/patio'}"
+                                        class="ml-2 bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded-md transition-colors text-xs"
+                                        onclick="return confirm('Remover este pátio? Faça pelo próprio CRUD para confirmar.');">
+                                        Remover
+                                    </a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+        </section>
+    </main>
+
+    <div th:replace="~{fragments/footer :: footer}"></div>
+
+    <!-- Filtro client-side simples para pátios -->
+    <script>
+        const input = document.getElementById('filterPatio');
+        const rows = () => Array.from(document.querySelectorAll('#tablePatio tbody tr'))
+            .filter(r => !r.querySelector('td[colspan]')); // ignora "Sem registros."
+        if (input) {
+            input.addEventListener('input', () => {
+                const q = input.value.toLowerCase();
+                rows().forEach(tr => {
+                    const nome = tr.querySelector('.patio-nome')?.textContent?.toLowerCase() || '';
+                    tr.style.display = nome.includes(q) ? '' : 'none';
+                });
+            });
+        }
+    </script>
+</body>
+
+</html>

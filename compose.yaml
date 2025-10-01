@@ -1,0 +1,10 @@
+services:
+  postgres:
+    image: 'postgres:latest'
+    container_name: postgres_tech_lab
+    environment:
+      - 'POSTGRES_DB=tech_lab'
+      - 'POSTGRES_PASSWORD=tech_lab'
+      - 'POSTGRES_USER=tech_lab'
+    ports:
+      - '5432:5432'
