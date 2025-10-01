@@ -2,38 +2,7 @@ name: 'Build and deploy JAR app to Azure Web App: app-pg-rm555276'
 
 on:
   push:
-    branches: [ main ]name: Build and deploy JAR app to Azure Web App
-
-on:
-  push:
-    branches: [ "main" ]
-  workflow_dispatch:
-
-jobs:
-  build-and-deploy:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Set up Java 17
-        uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: 17
-
-      - name: Build with Maven
-        run: mvn -B -q clean package
-
-      - name: Deploy to Azure Web App
-        uses: azure/webapps-deploy@v2
-        with:
-          app-name: app-pg-rm555276 
-          slot-name: production
-          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
-          package: "${{ github.workspace }}/target/*.jar"
-
+    branches: [ main ]
   workflow_dispatch:
 
 jobs:
@@ -65,5 +34,5 @@ jobs:
       with:
         app-name: 'app-pg-rm555276'
         slot-name: 'production'
-        publish-profile: ${{ secrets.AzureAppService_PublishProfile_6a906e3eb79e4e25886bac90654c9af8 }}
+        publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_A2689BCC1D634A7B8E270705C7517A65 }}
         package: 'build/libs/*.jar'
