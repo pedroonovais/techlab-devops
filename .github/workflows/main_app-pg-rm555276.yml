@@ -1,33 +1,38 @@
-# Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
-# More GitHub Actions for Azure: https://github.com/Azure/actions
-
 name: 'Build and deploy JAR app to Azure Web App: app-pg-rm555276'
 
 on:
   push:
-    branches:
-    - main
+    branches: [ main ]
   workflow_dispatch:
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-    
+
     steps:
-    - uses: actions/checkout@v2
-    
-    - name: Set up Java version
-      uses: actions/setup-java@v1
+    - uses: actions/checkout@v4
+
+    - name: Set up Java
+      uses: actions/setup-java@v4
       with:
+        distribution: temurin
         java-version: '17'
-    
-    - name: Build with Maven
-      run: mvn clean install
+
+    - name: Make gradlew executable
+      run: chmod +x ./gradlew
+
+    - name: Build with Gradle
+      run: ./gradlew clean bootJar -x test
+      # Se seus testes de build precisam do DB, remova -x test e descomente:
+      # env:
+      #   SPRING_DATASOURCE_URL: ${{ secrets.SPRING_DATASOURCE_URL }}
+      #   SPRING_DATASOURCE_USERNAME: ${{ secrets.SPRING_DATASOURCE_USERNAME }}
+      #   SPRING_DATASOURCE_PASSWORD: ${{ secrets.SPRING_DATASOURCE_PASSWORD }}
 
     - name: Deploy to Azure Web App
       uses: azure/webapps-deploy@v2
-      with: 
-        app-name: 'app-pg-rm555276'
+      with:
+        app-name: 'app-pg-rm556219'
         slot-name: 'production'
-        publish-profile: ${{ secrets.AzureAppService_PublishProfile_a2689bcc1d634a7b8e270705c7517a65 }}
-        package: '${{ github.workspace }}/target/*.jar'
+        publish-profile: ${{ secrets.AzureAppService_PublishProfile_6a906e3eb79e4e25886bac90654c9af8 }}
+        package: 'build/libs/*.jar'
